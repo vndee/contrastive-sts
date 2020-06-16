@@ -1,1 +1,1 @@
-#### Contrastive Learning for Semantic Text Similarity
+### Contrastive Learning for Semantic Text Similarity
