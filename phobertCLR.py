@@ -153,14 +153,17 @@ class PhoBERTCLREncoder(torch.nn.Module):
             config=self.config
         )
 
-        self.linear_1 = torch.nn.Linear(768, 768)
-        self.linear_2 = torch.nn.Linear(768, 512)
+        self.linear_1 = torch.nn.Linear(4 * 768, 4 * 768)
+        self.linear_2 = torch.nn.Linear(4 * 768, 512)
 
     def forward(self, inputs, attention_mask):
         phobert_output = self.phobert(inputs,
                                       attention_mask=attention_mask,
-                                      output_hidden_states=True)[0]
-        features = phobert_output[:, 0, :]
+                                      output_hidden_states=True)
+        features = torch.cat((phobert_output[2][-1][:, 0, ...],
+                              phobert_output[2][-2][:, 0, ...],
+                              phobert_output[2][-3][:, 0, ...],
+                              phobert_output[2][-4][:, 0, ...]), -1)
         x = self.linear_1(features)
         x = torch.nn.functional.tanh(x)
         x = self.linear_2(x)
@@ -188,7 +191,7 @@ class PhoBERTCLR(object):
                 sentence_2 = sentence_2.to(DEVICE)
 
                 sent_1 = self.phobert_encoder(sentence_1, (sentence_1 > 0).to(DEVICE))
-                sent_2 = self.phobert_encoder(sentence_2, (sentence_1 > 0).to(DEVICE))
+                sent_2 = self.phobert_encoder(sentence_2, (sentence_2 > 0).to(DEVICE))
 
                 sent_1 = torch.nn.functional.normalize(sent_1, dim=1)
                 sent_2 = torch.nn.functional.normalize(sent_2, dim=1)
@@ -206,8 +209,8 @@ class PhoBERTCLR(object):
 
 data_dir = os.path.join(os.getcwd(), 'data', 'VNNEWS')
 dataset = VNNewsDataset(data_dir, max_length=200, remove_negative_pair=True)
-data_loader = DataLoader(dataset, batch_size=2, num_workers=4, shuffle=True, drop_last=True)
+data_loader = DataLoader(dataset, batch_size=1, num_workers=4, shuffle=True, drop_last=True)
 
 print(f'Loaded {len(dataset)} samples.')
-model = PhoBERTCLR(batch_size=2)
+model = PhoBERTCLR(batch_size=1)
 model.train(data_loader, num_epochs=20)
