@@ -242,6 +242,7 @@ class PhoBERTCLR(object):
 
                 # print(f'Epoch [{epoch}/{num_epochs}] - [{idx}/{len(data_loader)}]: {round(loss.item(), 7)}')
                 if loss.item() < prev_loss:
+                    prev_loss = loss.item()
                     torch.save(self.phobert_encoder.state_dict(),
                                os.path.join('outputs', 'checkpoint.vndee'))
 
