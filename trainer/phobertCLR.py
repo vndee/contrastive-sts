@@ -24,7 +24,7 @@ nt_xent_params = {
 
 
 class BPEConfig:
-    bpe_codes = os.path.join(os.getcwd(), 'pretrained', 'PhoBERT_base_transformers', 'bpe.codes')
+    bpe_codes = os.path.join(os.getcwd(), '../pretrained', 'PhoBERT_base_transformers', 'bpe.codes')
 
 
 def padding(x, max_length):
@@ -57,9 +57,9 @@ class VNNewsDataset(Dataset):
 
         self.bpe = fastBPE(BPEConfig)
         self.vocab = Dictionary()
-        self.vocab.add_from_file(os.path.join(os.getcwd(), 'pretrained', 'PhoBERT_base_transformers', 'dict.txt'))
+        self.vocab.add_from_file(os.path.join(os.getcwd(), '../pretrained', 'PhoBERT_base_transformers', 'dict.txt'))
         self.rdr_segmenter = VnCoreNLP(
-            os.path.join('vncorenlp', 'VnCoreNLP-1.1.1.jar'),
+            os.path.join('../vncorenlp', 'VnCoreNLP-1.1.1.jar'),
             annotators='wseg',
             max_heap_size='-Xmx500m'
         )
@@ -180,11 +180,11 @@ class PhoBERTCLREncoder(torch.nn.Module):
         super(PhoBERTCLREncoder, self).__init__()
 
         self.config = RobertaConfig.from_pretrained(
-            os.path.join(os.getcwd(), 'pretrained', 'PhoBERT_base_transformers', 'config.json')
+            os.path.join(os.getcwd(), '../pretrained', 'PhoBERT_base_transformers', 'config.json')
         )
 
         self.phobert = RobertaModel.from_pretrained(
-            os.path.join(os.getcwd(), 'pretrained', 'PhoBERT_base_transformers', 'model.bin'),
+            os.path.join(os.getcwd(), '../pretrained', 'PhoBERT_base_transformers', 'model.bin'),
             config=self.config
         )
 
@@ -249,7 +249,7 @@ class PhoBERTCLR(object):
             print(f'Epoch [{epoch}/{num_epochs}] done with average loss: {round(avg_loss / len(data_loader), 7)}')
 
 
-data_dir = os.path.join(os.getcwd(), 'data', 'VNNEWS')
+data_dir = os.path.join(os.getcwd(), '../data', 'VNNEWS')
 dataset = VNNewsDataset(data_dir, max_length=200, remove_negative_pair=True)
 data_loader = DataLoader(dataset, batch_size=3, num_workers=4, shuffle=True, drop_last=True)
 
