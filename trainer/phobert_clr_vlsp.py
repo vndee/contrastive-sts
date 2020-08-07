@@ -48,10 +48,10 @@ class BertCLR(object):
 
         prev_loss = 9999.9999
         for epoch in range(num_epochs):
-            avg_loss = 0.0
+            avg_loss, cnt = 0.0, 0
             self.encoder.train()
 
-            for x, item_x in enumerate(data_loader):
+            for x, item_x in enumerate(tqdm(data_loader, desc=f'EPOCH {epoch}/{num_epochs}')):
                 for y in range(x):
                     if x == y:
                         continue
@@ -64,12 +64,12 @@ class BertCLR(object):
                     y_z = self.encoder(item_y, attention_mask=attn_y)
 
                     loss = self.criterion(x_z, y_z)
+                    avg_loss += loss.item()
+                    cnt += 1
                     loss.backward()
 
-                    print(f'[{x} - {y}/{len(data_loader)}] - Loss: {loss.item()}')
-
-                optim.step()
-
+            print(f'EPOCH {epoch}/{num_epochs} - Loss: {avg_loss/cnt}')
+            optim.step()
             scheduler.step()
 
         
